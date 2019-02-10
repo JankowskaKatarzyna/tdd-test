@@ -105,30 +105,57 @@ public class InvoiceTest {
 	public void testInvoiceWithNegativeQuantity() {
 		invoice.addProduct(new DairyProduct("Zsiadle mleko", new BigDecimal("5.55")), -1);
 	}
-	
+
 	@Test
-	public void testInvoiceHasNumber(){
+	public void testInvoiceHasNumber() {
 		Integer number = invoice.getNumber();
 		Assert.assertNotNull(number);
 	}
-	
+
 	@Test
-	public void testInvoiceHasNumberGreaterByZero(){
+	public void testInvoiceHasNumberGreaterByZero() {
 		Integer number = invoice.getNumber();
-		Assert.assertThat(number,Matchers.greaterThan(0));
+		Assert.assertThat(number, Matchers.greaterThan(0));
 	}
-	
+
 	@Test
-	public void testTwoInvoicesHaveDifferentNumbers(){
+	public void testTwoInvoicesHaveDifferentNumbers() {
 		Integer number1 = invoice.getNumber();
 		Integer number2 = new Invoice().getNumber();
-		Assert.assertNotEquals(number1,number2);
+		Assert.assertNotEquals(number1, number2);
+	}
+
+	@Test
+	public void testPrintedInvoiceContainsNumber() {
+		String printedInvoice = invoice.getAsText();
+		String number = invoice.getNumber().toString();
+		Assert.assertThat(printedInvoice, Matchers.containsString("Faktura nr: " + number));
+
 	}
 	
 	@Test
-	public void testTheSameInvoiceHaveAlwaysTheSameNumber(){
-		Integer number1 = invoice.getNumber();
-		Integer number2 = invoice.getNumber();
-		Assert.assertEquals(number1,number2);
+	public void testPrintedInvoiceReturnProdactsNumber() {
+		invoice.addProduct(new OtherProduct("Bread",new BigDecimal(2.0d)),20);
+		invoice.addProduct(new TaxFreeProduct("Concrete",new BigDecimal(122.0d)),114);
+		invoice.addProduct(new DairyProduct("Milk",new BigDecimal(1.5d)),3);
+		String printedInvoice = invoice.getAsText();
+		Assert.assertThat(printedInvoice, Matchers.containsString("Liczba pozycji: 3"));
 	}
+	
+	@Test
+	public void testEveryProductIsInNewLineInPrintedInvoice() {
+		invoice.addProduct(new OtherProduct("Pillow",new BigDecimal("20.0")),12);
+		invoice.addProduct(new DairyProduct("Jar",new BigDecimal("5.5")),5);
+		String printedInvoice = invoice.getAsText();
+		Assert.assertThat(printedInvoice, Matchers.containsString("Pillow 12 20.0/nJar 5 5.5"));
+	}
+	
+	@Test
+	public void testAddingSameProdustToInvoiceTwice() {
+		invoice.addProduct(new TaxFreeProduct("Pillow",new BigDecimal("5")));
+		invoice.addProduct(new TaxFreeProduct("Pillow",new BigDecimal("5")));
+		String printedInvoice = invoice.getAsText();
+		Assert.assertThat(printedInvoice, Matchers.containsString("Pillow 2 5"));
+	}
+	
 }
